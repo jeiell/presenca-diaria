@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presença Diária</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        /* RESET & SISTEMA DE CORES CINEMATOGRÁFICO - PALETA CHARCOAL SLATE */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        :root {
+            --bg-principal: linear-gradient(180deg, #1a222d 0%, #11161d 100%);
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --bg-card-hover: rgba(255, 255, 255, 0.06);
+            --borda: rgba(255, 255, 255, 0.06);
+            --texto-puro: #ffffff;
+            --texto-mutado: #7e8b9b;
+            --texto-leitura: #d1d7e0;
+            --transicao-suave: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        body { 
+            background: #0b0e13; /* Fundo escuro externo no PC para destacar o container */
+            color: var(--texto-puro); 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            -webkit-font-smoothing: antialiased; 
+            min-height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; /* Centraliza verticalmente o app no monitor do PC */
+            overflow-x: hidden; 
+        }
+
+        /* TEMA: MODO MEDITAÇÃO ORGÂNICO */
+        body.modo-meditacao { 
+            --bg-principal: linear-gradient(180deg, #070708 0%, #0f0f12 100%);
+            --bg-card: rgba(255, 255, 255, 0.01);
+            --bg-card-hover: rgba(255, 255, 255, 0.02);
+            --borda: rgba(255, 255, 255, 0.02);
+            --texto-leitura: #e3d3b4; 
+            --texto-mutado: #4a4a55;
+        }
+
+        /* CONTAINER RESPONSIVO (ESTILO APP DESKTOP NO PC / TELA CHEIA NO MOBILE) */
+        .container { 
+            width: 100%; 
+            max-width: 450px; /* Garante proporção elegante de smartphone em telas grandes */
+            position: relative; 
+            display: flex; 
+            flex-direction: column; 
+            min-height: 100vh; 
+            background: var(--bg-principal); 
+            margin: 0 auto; 
+            box-shadow: 0 20px 80px rgba(0,0,0,0.7);
+            transition: var(--transicao-suave);
+        }
+
+        /* ADAPTAÇÃO MOBILE SELETIVA VIA MEDIA QUERIES */
+        @media (max-width: 480px) {
+            body { align-items: flex-start; background: var(--bg-principal); }
+            .container { max-width: 100%; box-shadow: none; }
+        }
+
+        /* TRANSIÇÃO NATIVA (SLIDE LATERAL) */
+        .view { 
+            display: none; 
+            padding: 20px 28px 0 28px; 
+            flex: 1; 
+            opacity: 0; 
+            transform: translateX(30px);
+            will-change: transform, opacity;
+            transition: var(--transicao-suave);
+        }
+        .view.active { 
+            display: flex; 
+            flex-direction: column; 
+            opacity: 1; 
+            transform: translateX(0);
+        }
+
+        #view-read.view { padding: 0; transform: translateY(40px); }
+        #view-read.view.active { display: block; transform: translateY(0); }
+        .conteudo-leitura-padding { padding: 0 28px 28px 28px; display: flex; flex-direction: column; flex: 1; position: relative; }
+
+        /* SPLASH SCREEN PREMIUM */
+        #splash-screen { 
+            position: fixed; 
+            inset: 0; 
+            background: #11161d; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 999; 
+            transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .splash-logo { font-size: 1.05rem; text-transform: uppercase; letter-spacing: 8px; color: #ffffff; font-weight: 300; animation: pulso 2.5s infinite ease-in-out; }
+        @keyframes pulso { 0%, 100% { opacity: 0.4; transform: scale(0.97); } 50% { opacity: 1; transform: scale(1); } }
+
+        /* NAVVARS GLASSMORPHISM */
+        .navbar { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            position: relative; 
+            height: 70px; 
+            border-bottom: 1px solid var(--borda); 
+            margin-bottom: 25px; 
+        }
+        .navbar-leitura { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 75px; 
+            display: flex; 
+            align-items: center; 
+            padding: 0 28px; 
+            z-index: 10; 
+            background: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 100%); 
+        }
+        .nav-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 3.5px; color: var(--texto-mutado); font-weight: 600; }
+        .btn-back { position: absolute; left: 0; top: 50%; transform: translateY(-50%); background: none; border: none; color: #ffffff; font-size: 1.5rem; cursor: pointer; padding: 10px; transition: var(--transicao-suave); }
+        .btn-back:active { transform: translateY(-50%) scale(0.85); opacity: 0.5; }
+
+        /* SAUDAÇÃO */
+        .saudacao-box { padding: 0 4px 15px 4px; display: flex; flex-direction: column; gap: 4px; }
+        .saudacao-texto { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.5px; }
+        .saudacao-sub { font-size: 0.8rem; color: var(--texto-mutado); line-height: 1.4; }
+
+        /* PROGRESSO SEMANAL */
+        .progresso-semanal-container { background: var(--bg-card); border: 1px solid var(--borda); padding: 16px; border-radius: 4px; margin-bottom: 28px; display: flex; flex-direction: column; gap: 10px; }
+        .progresso-header { display: flex; justify-content: space-between; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--texto-mutado); font-weight: 700; }
+        .progresso-barra-fundo { width: 100%; height: 3px; background: rgba(255,255,255,0.03); border-radius: 2px; overflow: hidden; }
+        .progresso-barra-ativa { height: 100%; width: 0%; background: #4caf50; transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 0 12px rgba(76,175,80,0.3); }
+
+        /* CONTROLES FILTRO */
+        .container-filtros { display: flex; gap: 8px; margin-bottom: 24px; background: rgba(0,0,0,0.1); padding: 4px; border-radius: 4px; border: 1px solid var(--borda); }
+        .btn-filtro { flex: 1; padding: 10px; background: transparent; border: none; color: var(--texto-mutado); font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; cursor: pointer; transition: var(--transicao-suave); border-radius: 2px; }
+        .btn-filtro.active { background: var(--bg-card-hover); border: 1px solid var(--borda); color: #ffffff; }
+
+        /* CARD CAPA HOME */
+        .card-capa-dia { 
+            position: relative; 
+            width: 100%; 
+            height: 380px; 
+            border: 1px solid var(--borda); 
+            border-radius: 4px; 
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: flex-end; 
+            padding: 35px 25px; 
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5); 
+            margin-bottom: 28px; 
+            transition: var(--transicao-suave);
+        }
+        .card-capa-dia:active { transform: scale(0.985); }
+        .card-capa-dia img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.45; transition: transform 12s cubic-bezier(0.16, 1, 0.3, 1); }
+        .card-capa-dia:hover img { transform: scale(1.08); }
+        .capa-content { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .tag-data { font-size: 0.55rem; background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); color: #ffffff; padding: 6px 14px; font-weight: 700; display: inline-block; margin-bottom: 20px; letter-spacing: 2px; border-radius: 2px; text-transform: uppercase; }
+        .capa-titulo { font-size: 1.6rem; font-family: "Georgia", serif; font-style: italic; font-weight: 400; margin-bottom: 35px; line-height: 1.35; text-shadow: 0 4px 15px rgba(0,0,0,0.9); }
+        .btn-premium { background: #ffffff; border: none; color: #11161d; padding: 15px 50px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2.5px; cursor: pointer; border-radius: 2px; font-weight: 700; box-shadow: 0 4px 20px rgba(255,255,255,0.15); transition: var(--transicao-suave); }
+
+        /* HISTÓRICO FEED MENSAGENS */
+        .grid-menus { display: flex; flex-direction: column; gap: 12px; margin-bottom: 35px; }
+        .btn-menu-extra { 
+            background: var(--bg-card); 
+            border: 1px solid var(--borda); 
+            border-radius: 4px; 
+            padding: 20px 24px; 
+            color: #e2e8f0; 
+            font-size: 0.75rem; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            cursor: pointer; 
+            transition: var(--transicao-suave); 
+        }
+        .btn-menu-extra:hover, .btn-menu-extra:active { background: var(--bg-card-hover); border-color: rgba(255,255,255,0.12); }
+        .btn-menu-extra span.icone { color: var(--texto-mutado); font-size: 0.9rem; }
+        
+        .feed-lista { display: flex; flex-direction: column; gap: 14px; margin-bottom: 35px; }
+        .item-feed { display: flex; background: var(--bg-card); border: 1px solid var(--borda); border-radius: 4px; height: 95px; align-items: center; cursor: pointer; overflow: hidden; position: relative; transition: var(--transicao-suave); }
+        .item-feed:active { transform: scale(0.985); background: var(--bg-card-hover); }
+        .item-feed img { width: 95px; height: 100%; object-fit: cover; opacity: 0.5; transition: var(--transicao-suave); }
+        .item-feed-body { flex: 1; padding: 18px; display: flex; flex-direction: column; justify-content: center; }
+        .item-feed-data { font-size: 0.55rem; color: var(--texto-mutado); letter-spacing: 1.5px; margin-bottom: 6px; font-weight: 700; display: flex; align-items: center; gap: 8px; text-transform: uppercase; }
+        .item-feed-titulo { font-size: 0.95rem; font-weight: 500; color: #f1f5f9; }
+        .btn-ler-fino { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255,255,255,0.04); color: #ffffff; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.5px; padding: 8px 16px; margin-right: 18px; border-radius: 2px; font-weight: 600; transition: var(--transicao-suave); }
+        .badge-lido { background: rgba(76, 175, 80, 0.1); color: #a1e3a4; border: 1px solid rgba(76, 175, 80, 0.15); padding: 2px 6px; border-radius: 2px; font-size: 0.55rem; }
+        .aviso-vazio { text-align: center; font-size: 0.8rem; color: var(--texto-mutado); padding: 50px 0; letter-spacing: 1px; }
+
+        /* TELA LEITURA */
+        .capa-leitura-topo { width: 100%; height: 320px; position: relative; overflow: hidden; }
+        .capa-leitura-topo img { width: 100%; height: 100%; object-fit: cover; transition: transform 20s linear; transform: scale(1); }
+        .capa-leitura-topo.animar-capa img { transform: scale(1.12); } 
+        .capa-leitura-topo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, #11161d 0%, rgba(0,0,0,0) 60%); }
+        body.modo-meditacao .capa-leitura-topo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, #0f0f12 0%, rgba(0,0,0,0) 60%); }
+        
+        .barra-ferramentas-leitura { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; margin-bottom: 25px; background: rgba(255, 255, 255, 0.01); padding: 10px 14px; border-radius: 2px; border: 1px solid var(--borda); }
+        .botoes-fonte { display: flex; gap: 4px; }
+        .btn-fonte, .btn-meditar, .btn-share { background: rgba(255,255,255,0.02); border: 1px solid var(--borda); color: #f1f5f9; padding: 8px 14px; font-size: 0.65rem; font-weight: 700; border-radius: 2px; cursor: pointer; transition: var(--transicao-suave); text-transform: uppercase; letter-spacing: 1px; }
+        .btn-share { background: #ffffff; color: #11161d; border: none; font-weight: 700; }
+        
+        .card-leitura { background: transparent; padding: 10px 4px; position: relative; z-index: 5; margin-bottom: 30px; }
+        .meta-leitura { font-size: 0.65rem; color: var(--texto-mutado); letter-spacing: 2.5px; margin-bottom: 25px; text-transform: uppercase; font-weight: 700; border-left: 2px solid var(--texto-mutado); padding-left: 12px; }
+        .versiculo-texto { font-family: "Georgia", serif; font-size: 1.4rem; font-style: italic; line-height: 1.85; margin-bottom: 14px; color: #ffffff; font-weight: 400; }
+        .versiculo-ref { font-size: 0.8rem; color: var(--texto-mutado); text-align: right; margin-bottom: 35px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .separador { height: 1px; background: linear-gradient(90deg, var(--borda) 0%, rgba(255,255,255,0) 100%); margin-bottom: 35px; }
+        .texto-principal { color: var(--texto-leitura); line-height: 1.95; text-align: justify; white-space: pre-line; transition: font-size 0.2s ease, color 0.3s ease; font-size: 1.05rem; letter-spacing: 0.3px; }
+        .autor-texto { margin-top: 50px; font-size: 0.65rem; color: var(--texto-mutado); border-top: 1px solid var(--borda); padding-top: 25px; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; }
+        
+        /* INTERAÇÕES */
+        .box-interacoes { display: flex; justify-content: space-between; gap: 12px; margin-top: 40px; padding-top: 35px; border-top: 1px dashed var(--borda); }
+        .btn-interagir { flex: 1; padding: 15px; border-radius: 4px; border: 1px solid var(--borda); background: rgba(255,255,255,0.01); color: #ffffff; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; transition: var(--transicao-suave); position: relative; overflow: hidden; }
+        .btn-interagir.ativo-favorito { background: #e63946; color: white; border-color: #e63946; box-shadow: 0 8px 24px rgba(230, 57, 70, 0.25); }
+        .btn-interagir.ativo-concluido { background: #4caf50; color: white; border-color: #4caf50; box-shadow: 0 8px 24px rgba(76, 175, 80, 0.25); }
+
+        /* MODAL PIX */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(5, 7, 10, 0.9); backdrop-filter: blur(12px); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 24px; opacity: 0; transition: var(--transicao-suave); }
+        .modal-overlay.show { display: flex; opacity: 1; }
+        .modal-box { background: #161d26; border: 1px solid var(--borda); width: 100%; max-width: 400px; border-radius: 4px; padding: 35px; text-align: center; box-shadow: 0 30px 70px rgba(0,0,0,0.6); transform: scale(0.94); transition: var(--transicao-suave); }
+        .modal-overlay.show .modal-box { transform: scale(1); }
+        .modal-titulo { font-size: 1.15rem; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.3px; }
+        .modal-txt { font-size: 0.8rem; color: var(--texto-mutado); line-height: 1.6; margin-bottom: 25px; }
+        .pix-code-box { background: #11161d; padding: 16px; border-radius: 2px; font-size: 0.65rem; font-family: monospace; color: #a7f3d0; word-break: break-all; margin-bottom: 25px; border: 1px solid var(--borda); max-height: 80px; overflow-y: auto; text-align: left; }
+        .btn-modal-action { background: #ffffff; color: #11161d; border: none; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; width: 100%; padding: 15px; border-radius: 2px; cursor: pointer; margin-bottom: 14px; transition: var(--transicao-suave); }
+        .btn-modal-close { background: transparent; border: none; color: var(--texto-mutado); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; padding: 8px; transition: var(--transicao-suave); font-weight: 700; }
+
+        /* TOAST */
+        .toast { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%) translateY(30px); background: #ffffff; color: #11161d; padding: 14px 32px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; border-radius: 2px; z-index: 3000; opacity: 0; transition: var(--transicao-suave); box-shadow: 0 15px 40px rgba(0,0,0,0.4); pointer-events: none; }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        
+        footer { text-align: center; padding: 40px 0; font-size: 0.65rem; color: #404b57; letter-spacing: 2px; text-transform: uppercase; border-top: 1px solid rgba(255, 255, 255, 0.02); margin-top: auto; font-weight: 700; }
+    </style>
+</head>
+<body>
+
+    <div id="splash-screen">
+        <div class="splash-logo">Presença Diária</div>
+    </div>
+
+    <div id="toast" class="toast">Ação concluída!</div>
+
+    <div id="modal-apoio" class="modal-overlay">
+        <div class="modal-box">
+            <h3 class="modal-titulo">Apoie este Canal de Bênçãos</h3>
+            <p class="modal-txt">Sua contribuição voluntária ajuda a manter a hospedagem do aplicativo e o envio das mensagens diárias sempre ativos.</p>
+            <div class="pix-code-box" id="pix-key-text">00020101021126360014BR.GOV.BCB.PIX0114natanael@pix.com5204000053039865802BR5917NatanaelTeixeira6009SAOPAULO62070503APP6304ABCD</div>
+            <button class="btn-modal-action" onclick="copiarChavePix()">Copiar Código PIX</button>
+            <br>
+            <button class="btn-modal-close" onclick="fecharModalApoio()">Fechar</button>
+        </div>
+    </div>
+
+    <div class="container">
+        
+        <div id="view-home" class="view">
+            <div class="navbar"><h1 class="nav-title">Presença Diária</h1></div>
+            
+            <div class="saudacao-box">
+                <span class="saudacao-texto" id="txt-saudacao-dinamica">Olá, Natanael</span>
+                <span class="saudacao-sub">Reserve um momento hoje para falar com Deus.</span>
+            </div>
+
+            <div class="progresso-semanal-container">
+                <div class="progresso-header">
+                    <span>Consistência de Leitura</span>
+                    <span id="txt-progresso-status">0% CONCLUÍDO</span>
+                </div>
+                <div class="progresso-barra-fundo">
+                    <div class="progresso-barra-ativa" id="barra-progresso-dinamica"></div>
+                </div>
+            </div>
+
+            <div id="container-capa-hoje"></div>
+            
+            <div class="grid-menus">
+                <div class="btn-menu-extra"><span>Mensagens Anteriores</span><span class="icone">→</span></div>
+                <div class="btn-menu-extra" onclick="abrirModalApoio()"><span>Apoiar este Projeto</span><span class="icone">☕ →</span></div>
+            </div>
+            <footer>Feito por: Natanael Teixeira</footer>
+        </div>
+
+        <div id="view-list" class="view">
+            <div class="navbar">
+                <button class="btn-back" onclick="mudarTela('view-home')">←</button>
+                <span class="nav-title">Mensagens</span>
+            </div>
+
+            <div class="container-filtros">
+                <button class="btn-filtro ativo" id="filtro-todos" onclick="filtrarFeed('todos')">Todas</button>
+                <button class="btn-filtro" id="filtro-favoritos" onclick="filtrarFeed('favoritos')">❤️ Favoritos</button>
+            </div>
+
+            <div class="feed-lista" id="container-lista"></div>
+            <footer>Feito por: Natanael Teixeira</footer>
+        </div>
+
+        <div id="view-read" class="view">
+            <div class="navbar-leitura">
+                <button class="btn-back" id="btn-voltar-dinamico">←</button>
+            </div>
+            <div class="capa-leitura-topo" id="capa-leitura-dinamica"></div>
+            <div class="conteudo-leitura-padding">
+                
+                <div class="barra-ferramentas-leitura">
+                    <div class="botoes-fonte">
+                        <button class="btn-fonte" onclick="ajustarFonte(1)">A+</button>
+                        <button class="btn-fonte" onclick="ajustarFonte(-1)">A-</button>
+                    </div>
+                    <button class="btn-meditar" onclick="alternarModoMeditacao()">🌙 Modo Meditação</button>
+                    <button class="btn-share" id="btn-share-devocional">Compartilhar</button>
+                </div>
+
+                <div id="container-leitura"></div>
+                <footer>Feito por: Natanael Teixeira</footer>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="dados.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
