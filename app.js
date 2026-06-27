@@ -3,9 +3,10 @@ let devocionalAtivoAtual = null;
 let telaOrigemLeitura = 'view-home'; 
 let filtroAtivoAtual = 'todos'; 
 
-// BANCO DE DADOS LOCAL (LocalStorage) PARA REAÇÕES
+// BANCO DE DADOS LOCAL (LocalStorage) PARA REAÇÕES E TEMAS
 let favoritos = JSON.parse(localStorage.getItem('pd_favoritos')) || [];
 let concluidos = JSON.parse(localStorage.getItem('pd_concluidos')) || [];
+let temaEscuroAtivo = localStorage.getItem('pd_tema_escuro') === 'true';
 
 // GERENCIADOR DE TELAS
 function mudarTela(idTela) {
@@ -24,6 +25,61 @@ function mudarTela(idTela) {
         telaAlvo.style.display = (idTela === 'view-read') ? 'block' : 'flex';
         setTimeout(() => { telaAlvo.classList.add('active'); }, 20);
     }
+
+    atualizarAbasInferiores(idTela);
+    fecharMenuLateral();
+}
+
+function atualizarAbasInferiores(idTela) {
+    document.querySelectorAll('.tab-bar-fixa .tab-item').forEach(aba => {
+        aba.classList.remove('active');
+    });
+
+    if (idTela === 'view-home') {
+        const abaHome = document.querySelector('.tab-bar-fixa .tab-item:nth-child(1)');
+        if(abaHome) abaHome.classList.add('active');
+    } else if (idTela === 'view-list') {
+        const abaList = document.querySelector('.tab-bar-fixa .tab-item:nth-child(2)');
+        if(abaList) abaList.classList.add('active');
+    }
+}
+
+// FUNÇÃO DE CONVERSÃO E SELEÇÃO DO TEMA GLOBAL (VERDE PROFUNDO DO PRINT)
+function alternarTemaGlobal() {
+    temaEscuroAtivo = !temaEscuroAtivo;
+    localStorage.setItem('pd_tema_escuro', temaEscuroAtivo);
+    aplicarTemaEstado();
+}
+
+function aplicarTemaEstado() {
+    const btnHeader = document.querySelector('.btn-header-theme-toggle');
+    const btnSidebar = document.querySelector('.btn-txt-theme-toggle');
+    const btnLeitura = document.querySelector('.btn-theme-toggle');
+
+    if (temaEscuroAtivo) {
+        document.body.classList.add('tema-escuro');
+        if(btnHeader) btnHeader.innerText = "☀️";
+        if(btnSidebar) btnSidebar.innerText = "☀️ Modo Claro";
+        if(btnLeitura) btnLeitura.innerText = "☀️ Claro";
+        exibirToast("Modo escuro ativado! 🌿");
+    } else {
+        document.body.classList.remove('tema-escuro');
+        if(btnHeader) btnHeader.innerText = "🌙";
+        if(btnSidebar) btnSidebar.innerText = "🌙 Modo Escuro";
+        if(btnLeitura) btnLeitura.innerText = "🌙 Escuro";
+        exibirToast("Modo claro ativado! ✨");
+    }
+}
+
+// MENU LATERAL
+function abrirMenuLateral() {
+    const sidebar = document.getElementById('sidebar-menu');
+    if(sidebar) sidebar.classList.add('open');
+}
+
+function fecharMenuLateral() {
+    const sidebar = document.getElementById('sidebar-menu');
+    if(sidebar) sidebar.classList.remove('open');
 }
 
 // ALERTA DE TOAST
@@ -65,15 +121,6 @@ function atualizarBarraProgresso() {
 
     barra.style.width = porcentagem + "%";
     txtStatus.innerText = `${porcentagem}% CONCLUÍDO`;
-}
-
-// MODO MEDITAÇÃO
-function alternarModoMeditacao() {
-    document.body.classList.toggle('modo-meditacao');
-    const btn = document.querySelector('.btn-meditar');
-    if(btn) {
-        btn.innerText = document.body.classList.contains('modo-meditacao') ? "☀️ Modo Padrão" : "🌙 Modo Meditação";
-    }
 }
 
 // FAVORITOS E CONCLUÍDOS
@@ -134,28 +181,7 @@ function atualizarBotoesReacao(id) {
 // FILTROS
 function filtrarFeed(tipoFiltro) {
     filtroAtivoAtual = tipoFiltro;
-    
-    document.getElementById('filtro-todos').classList.remove('active');
-    document.getElementById('filtro-favoritos').classList.remove('active');
-    
-    if(tipoFiltro === 'todos') {
-        document.getElementById('filtro-todos').classList.add('active');
-    } else {
-        document.getElementById('filtro-favoritos').classList.add('active');
-    }
-    
     carregarListaFeed();
-}
-
-// AUXILIARES
-function abrirModalApoio() { document.getElementById('modal-apoio').classList.add('show'); }
-function fecharModalApoio() { document.getElementById('modal-apoio').classList.remove('show'); }
-function copiarChavePix() {
-    const textoPix = document.getElementById('pix-key-text').innerText;
-    navigator.clipboard.writeText(textoPix).then(() => {
-        exibirToast("Código Copia e Cola copiado! ☕");
-        fecharModalApoio();
-    });
 }
 
 function ajustarFonte(direcao) {
@@ -169,6 +195,7 @@ function ajustarFonte(direcao) {
 // RENDERS
 function carregarCapaHome() {
     const container = document.getElementById('container-capa-hoje');
+    if (!container) return;
     const hoje = listaDevocionais[0]; 
     
     if(hoje) {
@@ -268,13 +295,12 @@ function abrirLeitura(devocional, origem) {
 }
 
 function configurarMenusExtras() {
-    const menus = document.querySelectorAll('.btn-menu-extra');
-    if(menus.length >= 1) {
-        menus[0].onclick = () => {
+    document.querySelectorAll('.btn-menu-extra').forEach(botao => {
+        botao.onclick = () => {
             filtrarFeed('todos'); 
             mudarTela('view-list');
         };
-    }
+    });
 }
 
 // INITIALIZER
@@ -284,6 +310,9 @@ document.addEventListener("DOMContentLoaded", () => {
     carregarCapaHome();
     carregarListaFeed();
     configurarMenusExtras();
+    
+    // Inicializa o estado do tema salvo pelo usuário
+    aplicarTemaEstado();
     
     setTimeout(() => {
         const splash = document.getElementById('splash-screen');

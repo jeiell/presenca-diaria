@@ -28,5 +28,16 @@ const listaDevocionais = [
         texto: "Mesmo quando o cenário atual parece confuso, a palavra final sobre a sua vida vem do Alto. Os planos de Deus são de paz e esperança. Confie no processo.",
         autor: "Ministrado por: Pastor Antônio Silva",
         capa: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=500&q=80"
+    },
+
+     {
+        id: 3,
+                data: "18/06/2026",
+        titulo: "Sem Medo",
+        versiculo: "«Porque sou eu que conheço os planos que tenho para vocês', diz o Senhor...»",
+        referencia: "Jeremias 29:11",
+        texto: "Mesmo quando o cenário atual parece confuso, a palavra final sobre a sua vida vem do Alto. Os planos de Deus são de paz e esperança. Confie no processo.",
+        autor: "Ministrado por: Pastor Antônio Silva",
+        capa: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=500&q=80"
     }
 ];
