@@ -3,7 +3,7 @@ let devocionalAtivoAtual = null;
 let telaOrigemLeitura = 'view-home'; 
 let filtroAtivoAtual = 'todos'; 
 
-// CAPTURA DO EVENTO DE INSTALAÇÃO DO PWA (DISCRETO NA HOME)
+// CAPTURA DO EVENTO DE INSTALAÇÃO DO PWA
 let eventoInstalacaoPWA = null;
 
 // BANCO DE DADOS LOCAL (LocalStorage) PARA REAÇÕES E TEMAS
@@ -99,18 +99,27 @@ window.addEventListener('beforeinstallprompt', (e) => {
     }
 });
 
-function ejecutarInstalacaoPWA() {
-    if (!eventoInstalacaoPWA) return;
-    eventoInstalacaoPWA.prompt();
-    
-    eventoInstalacaoPWA.userChoice.then((choiceResult) => {
-        if (choiceResult.outcome === 'accepted') {
-            exibirToast("Obrigado por instalar nosso App! 📖✨");
-            const banner = document.getElementById('banner-instalar');
-            if (banner) banner.style.display = 'none';
+// FUNÇÃO CORRIGIDA DE INSTALAÇÃO DO APP NATIVO
+function executarInstalacaoPWA() {
+    if (eventoInstalacaoPWA) {
+        eventoInstalacaoPWA.prompt();
+        
+        eventoInstalacaoPWA.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                exibirToast("Obrigado por instalar nosso App! 📖✨");
+                const banner = document.getElementById('banner-instalar');
+                if (banner) banner.style.display = 'none';
+            }
+            eventoInstalacaoPWA = null;
+        });
+    } else {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if (isIOS) {
+            alert("Para instalar no seu iPhone: toque no ícone de 'Compartilhar' (seta para cima) no seu navegador e selecione 'Adicionar à Tela de Início'. 📲");
+        } else {
+            exibirToast("Use o menu de 3 pontinhos do navegador para instalar! ⚙️");
         }
-        eventoInstalacaoPWA = null;
-    });
+    }
 }
 
 // MENU LATERAL
@@ -128,7 +137,7 @@ function fecharMenuLateral() {
 function exibirToast(mensagem) {
     const toast = document.getElementById('toast');
     if(toast) {
-        toast.innerText = message = mensagem;
+        toast.innerText = mensagem;
         toast.classList.add('show');
         setTimeout(() => toast.classList.remove('show'), 2200);
     }
@@ -231,7 +240,7 @@ function carregarCapaHome() {
                 <img src="${hoje.capa}" alt="Capa Devocional">
                 <div class="capa-content">
                     <span class="tag-data">${hoje.data.substring(0,5)}</span>
-                    <h2 class="capa-titulo">${hoje.titulo}</h2>
+                    <h2 class="card-titulo" style="font-size: 1.35rem; font-weight: 700; margin-bottom: 16px; line-height: 1.3; color: var(--texto-reverso); text-align: left;">${hoje.titulo}</h2>
                     <button class="btn-premium" onclick="abrirLeituraPorId(${hoje.id}, 'view-home')">Ler</button>
                 </div>
             </div>
@@ -250,7 +259,7 @@ function carregarListaFeed() {
     });
 
     if(dadosFiltrados.length === 0) {
-        container.innerHTML = `<div class="aviso-vazio">Nenhuma mensagem salva nos favoritos. ❤️</div>`;
+        container.innerHTML = `<div class="aviso-vazio" style="padding: 20px; text-align: center; color: var(--texto-mutado); font-size: 0.9rem;">Nenhuma mensagem salva nos favoritos. ❤️</div>`;
         return;
     }
     
