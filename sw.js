@@ -1,12 +1,13 @@
-const CACHE_NAME = 'pd-v1';
+const CACHE_NAME = 'presenca-diaria-v1';
 const assets = [
   './',
   './index.html',
+  './app.js',
   './dados.js',
-  './app.js'
+  './manifest.json'
 ];
 
-// Instala o Service Worker e guarda os arquivos no cache
+// Instala o service worker e guarda os arquivos no cache
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
@@ -15,7 +16,7 @@ self.addEventListener('install', e => {
   );
 });
 
-// Executa as requisições consumindo o cache quando offline
+// Executa as requisições buscando no cache quando offline
 self.addEventListener('fetch', e => {
   e.respondWith(
     caches.match(e.request).then(response => {
