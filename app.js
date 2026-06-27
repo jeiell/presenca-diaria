@@ -3,6 +3,9 @@ let devocionalAtivoAtual = null;
 let telaOrigemLeitura = 'view-home'; 
 let filtroAtivoAtual = 'todos'; 
 
+// CAPTURA DO EVENTO DE INSTALAÇÃO DO PWA (DISCRETO NA HOME)
+let eventoInstalacaoPWA = null;
+
 // BANCO DE DADOS LOCAL (LocalStorage) PARA REAÇÕES E TEMAS
 let favoritos = JSON.parse(localStorage.getItem('pd_favoritos')) || [];
 let concluidos = JSON.parse(localStorage.getItem('pd_concluidos')) || [];
@@ -44,7 +47,7 @@ function atualizarAbasInferiores(idTela) {
     }
 }
 
-// FUNÇÃO DE CONVERSÃO E SELEÇÃO DO TEMA GLOBAL (VERDE PROFUNDO DO PRINT)
+// ALTERNAR TEMA GLOBAL
 function alternarTemaGlobal() {
     temaEscuroAtivo = !temaEscuroAtivo;
     localStorage.setItem('pd_tema_escuro', temaEscuroAtivo);
@@ -61,14 +64,53 @@ function aplicarTemaEstado() {
         if(btnHeader) btnHeader.innerText = "☀️";
         if(btnSidebar) btnSidebar.innerText = "☀️ Modo Claro";
         if(btnLeitura) btnLeitura.innerText = "☀️ Claro";
-        exibirToast("Modo escuro ativado! 🌿");
     } else {
         document.body.classList.remove('tema-escuro');
         if(btnHeader) btnHeader.innerText = "🌙";
         if(btnSidebar) btnSidebar.innerText = "🌙 Modo Escuro";
         if(btnLeitura) btnLeitura.innerText = "🌙 Escuro";
-        exibirToast("Modo claro ativado! ✨");
     }
+}
+
+// SAUDAÇÃO INTELIGENTE REFINADA (TOTALMENTE UNIVERSAL)
+function carregarSaudacao() {
+    const txt = document.getElementById('txt-saudacao-dinamica');
+    if(!txt) return;
+    
+    const hora = new Date().getHours();
+    
+    if (hora >= 5 && hora < 12) {
+        txt.innerText = "Bom dia";
+    } else if (hora >= 12 && hora < 18) {
+        txt.innerText = "Boa tarde";
+    } else {
+        txt.innerText = "Boa noite";
+    }
+}
+
+// CAPTURA AUTOMÁTICA DA INSTALAÇÃO PWA DO NAVEGADOR
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    eventoInstalacaoPWA = e;
+    
+    const banner = document.getElementById('banner-instalar');
+    if (banner) {
+        banner.style.display = 'flex';
+    }
+});
+
+function ejecutarInstalacaoPWA() {
+    if (!eventoInstalacaoPWA) return;
+    eventoInstalacaoPWA.prompt();
+    
+    eventoInstalacaoPWA.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+            exibirToast("Obrigado por instalar nosso App! 📖✨");
+            const banner = document.getElementById('banner-instalar');
+            if (banner) banner.style.display = 'none';
+        }
+        eventoInstalacaoPWA = null;
+    });
 }
 
 // MENU LATERAL
@@ -86,24 +128,9 @@ function fecharMenuLateral() {
 function exibirToast(mensagem) {
     const toast = document.getElementById('toast');
     if(toast) {
-        toast.innerText = mensagem;
+        toast.innerText = message = mensagem;
         toast.classList.add('show');
         setTimeout(() => toast.classList.remove('show'), 2200);
-    }
-}
-
-// SAUDAÇÃO INTELIGENTE
-function carregarSaudacao() {
-    const txt = document.getElementById('txt-saudacao-dinamica');
-    if(!txt) return;
-    
-    const hora = new Date().getHours();
-    if (hora >= 5 && hora < 12) {
-        txt.innerText = "Bom dia, Natanael";
-    } else if (hora >= 12 && hora < 18) {
-        txt.innerText = "Boa tarde, Natanael";
-    } else {
-        txt.innerText = "Boa noite, Natanael";
     }
 }
 
@@ -310,8 +337,6 @@ document.addEventListener("DOMContentLoaded", () => {
     carregarCapaHome();
     carregarListaFeed();
     configurarMenusExtras();
-    
-    // Inicializa o estado do tema salvo pelo usuário
     aplicarTemaEstado();
     
     setTimeout(() => {
@@ -321,7 +346,7 @@ document.addEventListener("DOMContentLoaded", () => {
             setTimeout(() => { 
                 splash.style.display = 'none'; 
                 mudarTela('view-home'); 
-            }, 500);
+            }, 600);
         }
-    }, 2000);
+    }, 2800);
 });
