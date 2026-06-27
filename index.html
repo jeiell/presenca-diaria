@@ -424,6 +424,44 @@ body.tema-escuro .item-feed:hover {
     opacity: 1;
     transform: scale(1.02);
 }
+
+/* CORREÇÃO 1: RESOLVER O BOTÃO VOLTAR DA LEITURA (FOTO 1) */
+.navbar-leitura .btn-back {
+    position: static; 
+    color: var(--texto-puro) !important; /* Força a seta a seguir a cor do tema dinâmico */
+    transform: none;
+    background: none !important; /* Elimina o fundo branco quadrado que apareceu no print */
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* CORREÇÃO 2: BLOQUEAR SELEÇÃO ACIDENTAL DE TEXTO NO CELULAR (FOTO 2) */
+/* Aplicamos em todo o app por padrão para parecer nativo... */
+* { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+    -webkit-tap-highlight-color: transparent; 
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none;    /* Firefox */
+    -ms-user-select: none;     /* IE10+ */
+    user-select: none;         /* Padrão: impede seleção de texto geral */
+}
+
+/* ...E liberamos a seleção EXCLUSIVAMENTE para o texto do devocional que o usuário lê */
+.texto-principal, 
+.versiculo-texto,
+#texto-dinamico-leitura {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text; /* Permite selecionar e copiar apenas a mensagem sagrada */
+}
     </style>
 </head>
 <body>
