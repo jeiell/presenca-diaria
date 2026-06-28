@@ -1,43 +1,22 @@
 const listaDevocionais = [
-    {
-        id: 1,
-        data: "21/06/2026",
-        titulo: "Marcas da infância",
-        versiculo: "«Não fui eu que lhe ordenei? Seja forte e corajoso! Não se apavore nem desanime, pois o Senhor, o seu Deus, estará com você por onde você andar.»",
-        referencia: "Josué 1:9",
-        texto: "Muitas vezes, os desafios da vida nos fazem parecer pequenos diante das circunstâncias. Mas a ordem de Deus para nós hoje permanece a mesma: coragem. \n\nA nossa força não vem da nossa própria capacidade, mas da certeza de que o Criador do universo caminha lado a lado conosco em cada passo.",
-        autor: "Ministrado por: Pastor Antônio Silva",
-        capa: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=500&q=80"
-    },
-    {
-        id: 2,
-        data: "20/06/2026",
-        titulo: "Orar é preciso!",
-        versiculo: "«O Senhor é o meu pastor; de nada terei falta. Em verdes pastagens me faz repousar e me conduz a águas tranquilas.»",
-        referencia: "Salmos 23:1-2",
-        texto: "Em um mundo acelerado e cheio de ansiedades, o convite do bom Pastor é para o descanso. \n\nEle sabe exatamente do que precisamos e nos guia para lugares de paz, suprindo não apenas nossas necessidades físicas, mas principalmente acalmando a nossa alma.",
-        autor: "Ministrado por: Pastora Camila Ramos",
-        capa: "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=500&q=80"
-    },
-    {
-        id: 3,
-                data: "19/06/2026",
-        titulo: "Sem escolha",
-        versiculo: "«Porque sou eu que conheço os planos que tenho para vocês', diz o Senhor...»",
-        referencia: "Jeremias 29:11",
-        texto: "Mesmo quando o cenário atual parece confuso, a palavra final sobre a sua vida vem do Alto. Os planos de Deus são de paz e esperança. Confie no processo.",
-        autor: "Ministrado por: Pastor Antônio Silva",
-        capa: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=500&q=80"
-    },
-
-     {
-        id: 3,
-                data: "18/06/2026",
-        titulo: "Sem Medo",
-        versiculo: "«Porque sou eu que conheço os planos que tenho para vocês', diz o Senhor...»",
-        referencia: "Jeremias 29:11",
-        texto: "Mesmo quando o cenário atual parece confuso, a palavra final sobre a sua vida vem do Alto. Os planos de Deus são de paz e esperança. Confie no processo.",
-        autor: "Ministrado por: Pastor Antônio Silva",
-        capa: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=500&q=80"
-    }
+  {
+    "id": 1,
+    "data": "2026-06-28",
+    "titulo": "O amor de Deus",
+    "versiculo": "E, no fim do sábado, quando já despontava o primeiro dia da semana, Maria Madalena e a outra Maria foram ver o sepulcro.",
+    "referencia": "Mateus 28:1",
+    "texto": "O Vazio que Transforma (Mateus 28:1-10). As mulheres chegaram ao sepulcro tomadas pela dor, mas encontraram um anjo, um terremoto e o túmulo vazio. A ordem foi clara: \"Não temais\". A ressurreição prova que a morte não tem a última palavra e que nenhuma dor é em vão.",
+    "autor": "Natanael Teixeira",
+    "capa": "cp-01.jpg"
+  },
+  {
+    "id": 2,
+    "data": "2026-06-29",
+    "titulo": "O agir Divino",
+    "versiculo": "O Senhor pelejará por vós, e vós vos calareis.",
+    "referencia": "Êxodo 14:14",
+    "texto": "Muitas vezes, diante de problemas financeiros, familiares ou espirituais, a nossa primeira reação é tentar resolver tudo com as próprias forças. O desespero, as reclamações ou a necessidade de se justificar só trazem mais ansiedade. Deus disse aos israelitas, encurralados entre o Mar Vermelho e o exército inimigo: \"O Senhor pelejará por vós, e vós vos calareis\" (Êxodo 14:14). \"Calar-se\" não significa apenas fechar a boca, mas aquietar o coração, deixar de lado o controle humano e reconhecer que Ele é quem tem a última palavra.",
+    "autor": "Adão Santos",
+    "capa": "cp-02.jpg"
+  }
 ];

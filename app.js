@@ -3,29 +3,22 @@ let devocionalAtivoAtual = null;
 let telaOrigemLeitura = 'view-home'; 
 let filtroAtivoAtual = 'todos'; 
 
-// CAPTURA DO EVENTO DE INSTALAÇÃO DO PWA
 let eventoInstalacaoPWA = null;
 
-// BANCO DE DADOS LOCAL (LocalStorage)
 let favoritos = JSON.parse(localStorage.getItem('pd_favoritos')) || [];
 let concluidos = JSON.parse(localStorage.getItem('pd_concluidos')) || [];
 let temaEscuroAtivo = localStorage.getItem('pd_tema_escuro') === 'true';
 
-// --- FUNÇÃO DE PROGRESSO ATUALIZADA (CORRETA) ---
 function atualizarBarraProgresso() {
     const totalItens = listaDevocionais.length;
     const totalLidos = concluidos.length; 
-
     const porcentagem = totalItens > 0 ? Math.round((totalLidos / totalItens) * 100) : 0;
-
     const barra = document.getElementById('barra-progresso-dinamica');
     const texto = document.getElementById('txt-progresso-status');
-
     if (barra) barra.style.width = porcentagem + '%';
     if (texto) texto.innerText = porcentagem + '% CONCLUÍDO';
 }
 
-// FUNÇÃO DE BACKUP (Para o usuário nunca perder o progresso)
 function gerarBackupProgresso() {
     const backup = localStorage.getItem('pd_concluidos');
     if (!backup) {
@@ -36,24 +29,20 @@ function gerarBackupProgresso() {
     exibirToast("Código de backup copiado! Guarde em local seguro.");
 }
 
-// GERENCIADOR DE TELAS
 function mudarTela(idTela) {
     if(idTela !== 'view-read') {
         const capa = document.getElementById('capa-leitura-dinamica');
         if(capa) capa.classList.remove('animar-capa');
     }
-
     document.querySelectorAll('.view').forEach(view => {
         view.classList.remove('active');
         view.style.display = 'none'; 
     });
-    
     const telaAlvo = document.getElementById(idTela);
     if(telaAlvo) {
         telaAlvo.style.display = (idTela === 'view-read') ? 'block' : 'flex';
         setTimeout(() => { telaAlvo.classList.add('active'); }, 20);
     }
-
     atualizarAbasInferiores(idTela);
     fecharMenuLateral();
 }
@@ -62,7 +51,6 @@ function atualizarAbasInferiores(idTela) {
     document.querySelectorAll('.tab-bar-fixa .tab-item').forEach(aba => {
         aba.classList.remove('active');
     });
-
     if (idTela === 'view-home') {
         const abaHome = document.querySelector('.tab-bar-fixa .tab-item:nth-child(1)');
         if(abaHome) abaHome.classList.add('active');
@@ -72,7 +60,6 @@ function atualizarAbasInferiores(idTela) {
     }
 }
 
-// ALTERNAR TEMA GLOBAL
 function alternarTemaGlobal() {
     temaEscuroAtivo = !temaEscuroAtivo;
     localStorage.setItem('pd_tema_escuro', temaEscuroAtivo);
@@ -83,7 +70,6 @@ function aplicarTemaEstado() {
     const btnHeader = document.querySelector('.btn-header-theme-toggle');
     const btnSidebar = document.querySelector('.btn-txt-theme-toggle');
     const btnLeitura = document.querySelector('.btn-theme-toggle');
-
     if (temaEscuroAtivo) {
         document.body.classList.add('tema-escuro');
         if(btnHeader) btnHeader.innerText = "☀️";
@@ -106,7 +92,6 @@ function carregarSaudacao() {
     else txt.innerText = "Boa noite";
 }
 
-// PWA
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     eventoInstalacaoPWA = e;
@@ -144,7 +129,6 @@ function exibirToast(mensagem) {
     }
 }
 
-// FAVORITOS E CONCLUÍDOS
 function alternarFavorito(id) {
     const index = favoritos.indexOf(id);
     if (index === -1) { favoritos.push(id); exibirToast("Mensagem guardada! ❤️"); } 
@@ -191,22 +175,26 @@ function ajustarFonte(direcao) {
     if(texto) texto.style.fontSize = tamanhoFonteAtual + "px";
 }
 
-// RENDERS
 function carregarCapaHome() {
     const container = document.getElementById('container-capa-hoje');
     if (!container) return;
-    const hoje = listaDevocionais[0]; 
-    if(hoje) {
+    
+    const hoje = new Date().toISOString().split('T')[0];
+    const devocionalHoje = listaDevocionais.find(d => d.data === hoje);
+
+    if(devocionalHoje) {
         container.innerHTML = `
             <div class="card-capa-dia">
-                <img src="${hoje.capa}" alt="Capa Devocional">
+                <img src="${devocionalHoje.capa}" alt="Capa Devocional" onerror="this.style.display='none'">
                 <div class="capa-content">
-                    <span class="tag-data">${hoje.data.substring(0,5)}</span>
-                    <h2 class="card-titulo" style="font-size: 1.35rem; font-weight: 700; margin-bottom: 16px; line-height: 1.3; color: var(--texto-reverso); text-align: left;">${hoje.titulo}</h2>
-                    <button class="btn-premium" onclick="abrirLeituraPorId(${hoje.id}, 'view-home')">Ler</button>
+                    <span class="tag-data">${devocionalHoje.data}</span>
+                    <h2 class="card-titulo" style="font-size: 1.35rem; font-weight: 700; margin-bottom: 16px; line-height: 1.3; color: var(--texto-reverso); text-align: left;">${devocionalHoje.titulo}</h2>
+                    <button class="btn-premium" onclick="abrirLeituraPorId(${devocionalHoje.id}, 'view-home')">Ler</button>
                 </div>
             </div>
         `;
+    } else {
+        container.innerHTML = `<p style="padding:20px;">Nenhum devocional programado para hoje.</p>`;
     }
 }
 
@@ -214,15 +202,26 @@ function carregarListaFeed() {
     const container = document.getElementById('container-lista');
     if (!container) return;
     container.innerHTML = '';
+
+    const hoje = new Date().toISOString().split('T')[0];
+
     const dadosFiltrados = listaDevocionais.filter(devocional => {
-        if (filtroAtivoAtual === 'favoritos') return favoritos.includes(devocional.id);
-        return true; 
+        const dataDevocional = devocional.data;
+        const dataPassadaOuHoje = dataDevocional <= hoje;
+        
+        if (filtroAtivoAtual === 'favoritos') {
+            return favoritos.includes(devocional.id) && dataPassadaOuHoje;
+        }
+        return dataPassadaOuHoje;
     });
 
+    dadosFiltrados.sort((a, b) => new Date(b.data) - new Date(a.data));
+
     if(dadosFiltrados.length === 0) {
-        container.innerHTML = `<div class="aviso-vazio" style="padding: 20px; text-align: center; color: var(--texto-mutado); font-size: 0.9rem;">Nenhuma mensagem salva. ❤️</div>`;
+        container.innerHTML = `<div class="aviso-vazio" style="padding: 20px; text-align: center; color: var(--texto-mutado); font-size: 0.9rem;">Nenhuma mensagem disponível ainda. ❤️</div>`;
         return;
     }
+
     dadosFiltrados.forEach(devocional => {
         const jaLido = concluidos.includes(devocional.id) ? '<span class="badge-lido">Lido</span>' : '';
         const item = document.createElement('div');
@@ -276,14 +275,12 @@ function abrirLeitura(devocional, origem) {
     mudarTela('view-read');
 }
 
-// INITIALIZER
 document.addEventListener("DOMContentLoaded", () => {
     carregarSaudacao();
     atualizarBarraProgresso();
     carregarCapaHome();
     carregarListaFeed();
     aplicarTemaEstado();
-    
     setTimeout(() => {
         const splash = document.getElementById('splash-screen');
         if(splash) {
