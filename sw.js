@@ -1,26 +1,25 @@
-const CACHE_NAME = 'presenca-diaria-v1';
+const CACHE_NAME = 'mana-diario-v3';
 const assets = [
   './',
   './index.html',
   './app.js',
   './dados.js',
-  './manifest.json'
+  './manifest.json',
+  './splash.jpg' // Certifique-se que sua imagem tenha este nome
 ];
 
-// Instala o service worker e guarda os arquivos no cache
 self.addEventListener('install', e => {
+  e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(assets)));
+});
+
+self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(assets);
+    caches.keys().then(keys => {
+      return Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)));
     })
   );
 });
 
-// Executa as requisições buscando no cache quando offline
 self.addEventListener('fetch', e => {
-  e.respondWith(
-    caches.match(e.request).then(response => {
-      return response || fetch(e.request);
-    })
-  );
+  e.respondWith(caches.match(e.request).then(res => res || fetch(e.request)));
 });
